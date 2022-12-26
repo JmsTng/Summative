@@ -7,10 +7,12 @@ class Player:
         self.rect.y = y
         self.keys = keys
 
-    def move(self, *, keys):
+    def move(self, canvas, *, keys):
         '''Move the player and handles collision with screen borders.'''
         vector = [0, 0]
-        if not (i := self.keys[0] in keys and (j := self.keys[2] in keys)):
-            vector[0] = 4 if i else -4 if j else 0
-        if not (i := self.keys[1] in keys and (j := self.keys[3] in keys)):
-            vector[1] = 4 if i else -4 if j else 0
+        if not (i := self.keys[0] in keys and (j := self.keys[2] in keys)): # check for collision
+            vector[0] = 5 if i else -5 if j else 0
+        if not (i := self.keys[1] in keys and (j := self.keys[3] in keys)): # check for collision
+            vector[1] = 5 if i else -5 if j else 0
+
+        self.rect.move_ip(vector)
