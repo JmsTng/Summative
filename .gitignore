@@ -1,0 +1,10 @@
+# IDE/Text Editor Configs
+.vscode/
+.config/
+.replit
+replit.nix
+
+# Packager Files
+.upm
+poetry.lock
+pyproject.toml
