@@ -1,13 +1,14 @@
 from pygame import image
 class Player:
-    def __init__(self, img, *, keys, x:int=0, y:int=0):
+    '''General class for playable character.'''
+    def __init__(self, img:str, keys:tuple, x:int=0, y:int=0):
         self.img = image.load(img)
         self.rect = self.img.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.keys = keys
 
-    def move(self, canvas, *, keys):
+    def move(self, canvas, keys):
         '''Move the player. Does not handle collision with screen borders.'''
         vector = [0, 0]
         if not (i := self.keys[0] in keys and (j := self.keys[2] in keys)): # check for collision
