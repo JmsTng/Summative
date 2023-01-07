@@ -3,7 +3,7 @@ import os
 import sys
 
 import pygame
-from objects import Player, Solid
+from objects import Player
 
 
 ### CONSTANTS ###
@@ -21,25 +21,19 @@ print(size)
 
 # PLAYERS
 P1 = Player(
-    screen,
-    os.path.join("assets", "Character1.png"),
-    (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d),
+    canvas=screen,
+    path=os.path.join("assets", "Character1.png"),
+    keys=(pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d),
     speed=5,
     x=center[0]-32,
     y=center[1]
 )
 P2 = Player(
-    screen,
-    os.path.join("assets", "Character2.png"),
-    (pygame.K_UP, pygame.K_LEFT, pygame.K_DOWN, pygame.K_RIGHT),
+    canvas=screen,
+    path=os.path.join("assets", "Character2.png"),
+    keys=(pygame.K_UP, pygame.K_LEFT, pygame.K_DOWN, pygame.K_RIGHT),
     speed=5,
     x=center[0]+32,
-    y=center[1]
-)
-log = Solid(
-    screen,
-    os.path.join("assets", "log_sprite.png"),
-    x=center[0],
     y=center[1]
 )
 
@@ -64,9 +58,7 @@ while True:
                     keys.append(key)
             P1.move(keys)
             P2.move(keys)
-            log.collides((P1, P2))
 
-    log.render()
     P1.render(screen)
     P2.render(screen)
 
