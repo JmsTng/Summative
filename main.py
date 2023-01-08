@@ -26,7 +26,8 @@ P1 = Player(
     keys=(pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d),
     speed=5,
     x=center[0]-32,
-    y=center[1]
+    y=center[1],
+    img_scale=2
 )
 P2 = Player(
     canvas=screen,
@@ -34,7 +35,8 @@ P2 = Player(
     keys=(pygame.K_UP, pygame.K_LEFT, pygame.K_DOWN, pygame.K_RIGHT),
     speed=5,
     x=center[0]+32,
-    y=center[1]
+    y=center[1],
+    img_scale=2
 )
 
 # INTERACTION
@@ -56,11 +58,10 @@ while True:
             for key in P1.keys+P2.keys:
                 if pressed[key]:
                     keys.append(key)
-            P1.move(keys)
-            P2.move(keys)
+            P1.move((P2,), keys)
+            P2.move((P1,), keys)
 
     P1.render(screen)
     P2.render(screen)
-
 
     pygame.display.flip()
