@@ -19,12 +19,6 @@ size = width, height = screen.get_size()
 center = (width//2, height//2)
 
 # OBJECTS
-walls = [
-    Object(canvas=screen, x=-1, y=-1, w=2, h=height), # left
-    Object(canvas=screen, x=width-1, y=-1, w=2, h=height+2), # right
-    Object(canvas=screen, x=-1, y=-1, w=width+2, h=2), # top
-    Object(canvas=screen, x=-1, y=height-1, w=width+2, h=2)]
-
 speed = width//1000
 P1 = Player(
     canvas=screen,
@@ -71,13 +65,11 @@ while True:
         for key in P1.keys+P2.keys:
             if pressed[key]:
                 keys.append(key)
-        P1.move((P2,*walls, box), keys)
-        P2.move((P1,*walls), keys)
+        P1.move((P2, box), keys)
+        P2.move((P1, box), keys)
 
     P1.render(screen)
     P2.render(screen)
-    for wall in walls:
-        wall.render(color=white, solid=True)
     box.render()
 
     pygame.display.flip()

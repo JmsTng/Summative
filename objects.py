@@ -26,19 +26,20 @@ class Object:
     
     def collides(self, entities):
         entities = self.near(entities)
-        free = ['l', 'r', 'u', 'd']
+        res = ([], [])
         for e in entities:
-            e = e.rect
-            if self.rect.clipline(e.right, e.top, e.right, e.bottom):
-                free.remove('l')
-            if self.rect.clipline(e.left, e.top, e.left, e.bottom):
-                free.remove('r')
-            if self.rect.clipline(e.left, e.bottom, e.right, e.bottom):
-                free.remove('u')
-            if self.rect.clipline(e.left, e.top, e.right, e.top):
-                free.remove('d')
+            r = e.rect
+            if self.rect.clipline(r.right, r.top, r.right, r.bottom):
+                res[0].append('l')
+            if self.rect.clipline(r.left, r.top, r.left, r.bottom):
+                res[0].append('r')
+            if self.rect.clipline(r.left, r.bottom, r.right, r.bottom):
+                res[0].append('u')
+            if self.rect.clipline(r.left, r.top, r.right, r.top):
+                res[0].append('d')
+            res[1].append(e)
         
-        return free
+        return res
         
     def render(self, canvas=None, color=None, solid=False):
         canvas = self.canvas if not canvas else canvas
@@ -46,6 +47,17 @@ class Object:
             pygame.draw.rect(canvas, color, self.rect)
         else:
             canvas.blit(self.img, self.rect)
+            
+            
+class Pickup(Object):
+    '''Class for objects that can be picked up.'''
+    def __init__(self, canvas:pygame.Surface, path:str, x:int=0, y:int=0, img_scale:float=1):
+        super().__init__(canvas=canvas, path=path, x=x, y=y, img_scale=img_scale)
+    
+    # def apply(self):
+    #     collide = self.collides(P1, P2)
+    #     if collide[1]:
+    #         self.destroy()
         
 class Player(Object):
     '''Class to represent playble characters.'''
@@ -55,15 +67,28 @@ class Player(Object):
         self.speed = speed
 
     def move(self, entities, keys):
-        free = self.collides(entities)
+        blocked = set(self.collides(entities)[0] + self.in_bounds(self.canvas.get_size()))
         vector = [0, 0]
-        if self.keys[0] in keys and free.count('u'):
+        if self.keys[0] in keys and 'u' not in blocked:
             vector[1] -= self.speed
-        if self.keys[1] in keys and free.count('l'):
+        if self.keys[1] in keys and 'l' not in blocked:
             vector[0] -= self.speed
-        if self.keys[2] in keys and free.count('d'):
+        if self.keys[2] in keys and 'd' not in blocked:
             vector[1] += self.speed
-        if self.keys[3] in keys and free.count('r'):
+        if self.keys[3] in keys and 'r' not in blocked:
             vector[0] += self.speed
             
         self.rect.move_ip(vector)
+        
+    def in_bounds(self, size):
+        res = []
+        if self.rect.y <= 0:
+            res.append('u')
+        if self.rect.x <= 0:
+            res.append('l')
+        if self.rect.y+self.rect.h >= size[1]:
+            res.append('d')
+        if self.rect.x+self.rect.w >= size[0]:
+            res.append('r')
+        
+        return res
