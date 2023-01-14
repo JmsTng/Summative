@@ -11,6 +11,7 @@ pygame.init()
 
 # COLOURS
 black = (0, 0, 0)
+snow = (230, 240, 255)
 white = (255, 255, 255)
 
 # DISPLAY
@@ -47,7 +48,7 @@ pygame.key.set_repeat(5*speed)
 
 ### EVENT LOOP ###
 while True:
-    screen.fill(black)
+    screen.fill(snow)
     pygame.event.pump()
 
     for event in pygame.event.get():
