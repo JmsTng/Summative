@@ -18,10 +18,10 @@ white = (255, 255, 255)
 screen = pygame.display.set_mode()
 size = width, height = screen.get_size()
 center = (width//2, height//2)
+scale = speed = width//1000
 
 # OBJECTS
 playerflame = Flame()
-speed = width//1000
 P1 = Player(
     canvas=screen,
     path=os.path.join("assets", "Character1.png"),
@@ -29,7 +29,7 @@ P1 = Player(
     speed=speed,
     x=center[0]-32,
     y=center[1],
-    img_scale=2,
+    img_scale=scale,
     flame=playerflame
 )
 P2 = Player(
@@ -39,25 +39,32 @@ P2 = Player(
     speed=speed,
     x=center[0]+32,
     y=center[1],
-    img_scale=2,
+    img_scale=scale,
     flame=playerflame
 )
 
-box = Object(canvas=screen, path=r'assets\Stone1.png', x=400, y=123, img_scale=3)
+box = Object(canvas=screen, path=os.path.join("assets", "Stone1.png"), x=400, y=123, img_scale=10)
 
 # INTERACTION
 pygame.key.set_repeat(5*speed)
 
 
+### Menus ###
+
+
 ### EVENT LOOP ###
 while True:
+    if playerflame.value <= 0:
+        print("you died")
+        break
+
     screen.fill(snow)
     pygame.event.pump()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            pygame.quit()
-            sys.exit()
+            print("quit")
+            break
         elif event.type == pygame.KEYDOWN:
             match event.key:
                 case pygame.K_r:
@@ -81,3 +88,6 @@ while True:
     box.render()
 
     pygame.display.flip()
+
+pygame.quit()
+sys.exit()

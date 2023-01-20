@@ -2,7 +2,7 @@ import pygame
 
 class Object:
     '''Base class for all entities.'''
-    def __init__(self, canvas:pygame.Surface, path:str=None, x:int=0, y:int=0, img_scale:float=1):
+    def __init__(self, canvas:pygame.Surface, path:str, x:int=0, y:int=0, img_scale:float=1):
         img = pygame.image.load(path)
         w = img.get_width()
         h = img.get_height()
@@ -115,3 +115,9 @@ class Player(Object):
             res.append('r')
         
         return res
+
+class Enemy(Object):
+    '''Crystal turret class'''
+    def __init__(self, canvas:pygame.Surface, path:str, *, x:int=0, y:int=0, img_scale:float=1, projectile:str):
+        super().__init__(canvas, path, x, y, img_scale)
+        self.projectile = projectile
