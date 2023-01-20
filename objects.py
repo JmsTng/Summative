@@ -57,9 +57,28 @@ class Pickup(Object):
     #         self.destroy()
 
 
-class Portal(Object):
-    '''For end puzzle/objective.'''
-    def __init__(self):
+# class Portal(Object):
+#     '''For end puzzle/objective.'''
+#     def __init__(self):
+
+
+class Flame:
+    '''Class to represent main game resource.'''
+    def __init__(self, value:int=1000):
+        self.value = value
+    
+    def __add__(self, other):
+        if type(other) == type(Flame):
+            return self.value + other.value
+        elif type(other) == type(int):
+            return self.value + other
+    
+    def __sub__(self, other):
+        if type(other) == Flame:
+            return self.value - other.value
+        elif type(other) == int:
+            return self.value - other
+    
 
 
 class Player(Object):
@@ -68,6 +87,7 @@ class Player(Object):
         super().__init__(canvas=canvas, path=path, x=x, y=y, img_scale=img_scale)
         self.keys = keys
         self.speed = speed
+        self.flame = flame
 
     def move(self, entities, keys):
         blocked = set(self.collides(entities)[0] + self.in_bounds(self.canvas.get_size()))
@@ -95,12 +115,3 @@ class Player(Object):
             res.append('r')
         
         return res
-
-
-class Flame:
-    '''Class to represent main game resource.'''
-    def __init__(self, value:int=1000):
-        self.value = value
-    
-    def __add__(self, other):
-        return self.value + other.value

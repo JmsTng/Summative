@@ -3,7 +3,7 @@ import os
 import sys
 
 import pygame
-from objects import Player, Object
+from objects import Flame, Player, Object
 
 
 ### CONSTANTS ###
@@ -20,6 +20,7 @@ size = width, height = screen.get_size()
 center = (width//2, height//2)
 
 # OBJECTS
+playerflame = Flame()
 speed = width//1000
 P1 = Player(
     canvas=screen,
@@ -28,7 +29,8 @@ P1 = Player(
     speed=speed,
     x=center[0]-32,
     y=center[1],
-    img_scale=2
+    img_scale=2,
+    flame=playerflame
 )
 P2 = Player(
     canvas=screen,
@@ -37,7 +39,8 @@ P2 = Player(
     speed=speed,
     x=center[0]+32,
     y=center[1],
-    img_scale=2
+    img_scale=2,
+    flame=playerflame
 )
 
 box = Object(canvas=screen, path=r'assets\Stone1.png', x=400, y=123, img_scale=3)
@@ -60,6 +63,8 @@ while True:
                 case pygame.K_r:
                     P1.rect.x, P1.rect.y = center[0]-32, center[1]
                     P2.rect.x, P2.rect.y = center[0]+32, center[1]
+                case pygame.K_e:
+                    playerflame.value = 1000 #testing
         
     if any(pressed := pygame.key.get_pressed()):
         keys = ['']*8
@@ -71,6 +76,8 @@ while True:
 
     P1.render(screen)
     P2.render(screen)
+    playerflame.value = round(playerflame.value - 0.1, 1)
+    pygame.draw.rect(screen, (235, 92, 52), (center[0]-playerflame.value/4, height-16, playerflame.value/2, 10), border_radius=5)
     box.render()
 
     pygame.display.flip()
