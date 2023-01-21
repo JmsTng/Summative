@@ -1,6 +1,7 @@
 ### IMPORTS ###
 import os
 import sys
+import time
 
 import pygame
 from objects import Flame, Player, Object
@@ -11,12 +12,14 @@ pygame.init()
 
 # COLOURS
 black = (0, 0, 0)
+flame = (235, 92, 52)
 snow = (230, 240, 255)
 white = (255, 255, 255)
 
 # DISPLAY
 screen = pygame.display.set_mode()
 size = width, height = screen.get_size()
+font = pygame.font.Font(r'assets\Grand9K Pixel.ttf', min(size)//16)
 center = (width//2, height//2)
 scale = speed = width//1000
 
@@ -50,12 +53,31 @@ pygame.key.set_repeat(5*speed)
 
 
 ### Menus ###
-
+def endgame(won=False):
+    screen.fill(black)
+    text = None
+    if won == True:
+        text = font.render("You won!", False, flame)
+    elif won == False:
+        text = font.render("You died!", False, flame)
+    else:
+        text = font.render("Game ended!", False, flame)
+    textrect = text.get_rect()
+    textrect.center = center
+    screen.blit(text, textrect)
+    pygame.display.flip()
+    pygame.event.clear()
+    time.sleep(0.5)
+    while True:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT or e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
 
 ### EVENT LOOP ###
 while True:
     if playerflame.value <= 0:
-        print("you died")
+        endgame()
         break
 
     screen.fill(snow)
@@ -63,7 +85,7 @@ while True:
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-            print("quit")
+            endgame('/')
             break
         elif event.type == pygame.KEYDOWN:
             match event.key:
@@ -83,8 +105,8 @@ while True:
 
     P1.render(screen)
     P2.render(screen)
-    playerflame.value = round(playerflame.value - 0.1, 1)
-    pygame.draw.rect(screen, (235, 92, 52), (center[0]-playerflame.value/4, height-16, playerflame.value/2, 10), border_radius=5)
+    playerflame.value = round(playerflame - Flame(1), 1)
+    pygame.draw.rect(screen, flame, (center[0]-playerflame.value/4, height-16, playerflame.value/2, 10), border_radius=5)
     box.render()
 
     pygame.display.flip()
