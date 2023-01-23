@@ -4,7 +4,7 @@ import sys
 import time
 
 import pygame
-from objects import Flame, Player, Object
+from objects import Enemy, Flame, Player, Object
 
 
 ### CONSTANTS ###
@@ -45,6 +45,14 @@ P2 = Player(
     img_scale=scale,
     flame=playerflame
 )
+E1 = Enemy(
+    canvas=screen,
+    path=os.path.join("assets", "Crystal.png"),
+    x=2000,
+    y=1000,
+    img_scale=3,
+    projectile=os.path.join("assets", "Ice_proj.png")
+)
 
 box = Object(canvas=screen, path=os.path.join("assets", "Stone1.png"), x=400, y=123, img_scale=10)
 
@@ -66,8 +74,8 @@ def endgame(won=False):
     textrect.center = center
     screen.blit(text, textrect)
     pygame.display.flip()
+    time.sleep(1)
     pygame.event.clear()
-    time.sleep(0.5)
     while True:
         for e in pygame.event.get():
             if e.type == pygame.QUIT or e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
@@ -103,13 +111,19 @@ while True:
         P1.move((P2, box), keys)
         P2.move((P1, box), keys)
 
-    P1.render(screen)
-    P2.render(screen)
-    playerflame.value = round(playerflame - Flame(1), 1)
+    
+    ### DISPLAY UPDATES ###
+    P1.render()
+    P2.render()
+    E1.shoot((P1, P2))
+    E1.render()
+    playerflame.value = round(playerflame - Flame(0.1), 1)
     pygame.draw.rect(screen, flame, (center[0]-playerflame.value/4, height-16, playerflame.value/2, 10), border_radius=5)
+    pygame.draw.rect(screen, black, (*E1.rect.center,1,1))
     box.render()
 
     pygame.display.flip()
+    time.sleep(0.01)
 
 pygame.quit()
 sys.exit()

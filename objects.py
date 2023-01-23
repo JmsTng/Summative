@@ -1,4 +1,8 @@
 import pygame
+from math import asin, cos, degrees, radians, pi, sin, sqrt
+
+def pythagoras(a, b):
+    return sqrt(a*a + b*b)
 
 class Object:
     '''Base class for all entities.'''
@@ -14,8 +18,8 @@ class Object:
         entities = list(entities)
         
         for e in entities:
-            if self.rect.right not in range(e.rect.left-64, e.rect.left+160) or \
-               self.rect.bottom not in range(e.rect.top-64, e.rect.top+160):
+            if not (e.rect.centerx-128 <= self.rect.centerx <= e.rect.centerx+128) or \
+               not (e.rect.centery-128 <= self.rect.centery <= e.rect.centery+128):
                 entities.remove(e)
                 continue
             
@@ -35,6 +39,19 @@ class Object:
             if self.rect.clipline(r.left, r.top, r.right, r.top):
                 res[0].append('d')
             res[1].append(e)
+        
+        return res
+        
+    def in_bounds(self, size):
+        res = []
+        if self.rect.y <= 0:
+            res.append('u')
+        if self.rect.x <= 0:
+            res.append('l')
+        if self.rect.y+self.rect.h >= size[1]:
+            res.append('d')
+        if self.rect.x+self.rect.w >= size[0]:
+            res.append('r')
         
         return res
     
@@ -78,7 +95,6 @@ class Flame:
             return self.value - other.value
         elif type(other) == int:
             return self.value - other
-    
 
 
 class Player(Object):
@@ -102,22 +118,61 @@ class Player(Object):
             vector[0] += self.speed
             
         self.rect.move_ip(vector)
-        
-    def in_bounds(self, size):
-        res = []
-        if self.rect.y <= 0:
-            res.append('u')
-        if self.rect.x <= 0:
-            res.append('l')
-        if self.rect.y+self.rect.h >= size[1]:
-            res.append('d')
-        if self.rect.x+self.rect.w >= size[0]:
-            res.append('r')
-        
-        return res
+
 
 class Enemy(Object):
     '''Crystal turret class'''
     def __init__(self, canvas:pygame.Surface, path:str, *, x:int=0, y:int=0, img_scale:float=1, projectile:str):
         super().__init__(canvas, path, x, y, img_scale)
         self.projectile = projectile
+        self.shottimer = 0
+        self.shots = []
+        
+    def shoot(self, entities):
+        if self.shottimer == 100:
+            print("new volley, straight")
+            self.shots.extend([
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=0, x=self.rect.centerx, y=self.rect.bottom, img_scale=3), # bottom
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=90, x=self.rect.right, y=self.rect.centery, img_scale=2), # right
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=180, x=self.rect.centerx, y=self.rect.top, img_scale=2), # top
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=270, x=self.rect.left, y=self.rect.centery, img_scale=2)]) # left
+        elif self.shottimer == 200:
+            print("new volley, diagonal")
+            self.shots.extend([
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=45, x=self.rect.centerx, y=self.rect.centery, img_scale=2),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=135, x=self.rect.centerx, y=self.rect.centery, img_scale=2),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=225, x=self.rect.centerx, y=self.rect.centery, img_scale=2),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, x=self.rect.centerx, y=self.rect.centery, img_scale=2)])
+            self.shottimer = 0
+        else:
+            for shot in self.shots:
+                shot.move(entities)
+                shot.render()
+        self.shottimer += 1
+
+
+class Projectile(Object):
+    '''Generic class for projectiles.'''
+    def __init__(self, canvas:pygame.Surface, path:str, speed:float, parent:Object, *, angle:int=None, x:int=0, y:int=0, img_scale:float=1, max_dist:int=450):
+        super().__init__(canvas, path, x, y, img_scale)
+        self.speed = speed
+        self.parent = parent
+        self.max_dist = max_dist
+        if angle == None:
+            mx, my = pygame.mouse.get_pos()
+            a = mx-self.parent.rect.centerx
+            weight = (a - mx)/(self.parent.rect.centerx - mx)
+            # a_ = (a - mx) / (self.parent.rect.centerx - mx)
+            print(weight)
+            # self.angle = degrees(asin(a_))
+        self.angle = angle
+        self.img = pygame.transform.rotate(self.img, self.angle+90)
+        
+    def move(self, entities):
+        blocked = set(self.collides(entities)[0] + self.in_bounds(self.canvas.get_size()))
+        if pythagoras(abs(self.rect.centerx-self.parent.rect.centerx), abs(self.rect.centery-self.parent.rect.centery)) > self.max_dist or \
+           (collision := self.collides(entities)):
+           return self.parent.shots.remove(self)
+        
+        self.rect.move_ip(self.speed*sin(radians(self.angle)), self.speed*cos(radians(self.angle)))
+        
