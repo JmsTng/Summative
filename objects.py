@@ -1,5 +1,5 @@
 import pygame
-from math import asin, cos, degrees, radians, pi, sin, sqrt
+from math import atan2, cos, degrees, radians, pi, sin, sqrt
 
 def pythagoras(a, b):
     return sqrt(a*a + b*b)
@@ -104,6 +104,7 @@ class Player(Object):
         self.keys = keys
         self.speed = speed
         self.flame = flame
+        self.shots = []
 
     def move(self, entities, keys):
         blocked = set(self.collides(entities)[0] + self.in_bounds(self.canvas.get_size()))
@@ -118,6 +119,9 @@ class Player(Object):
             vector[0] += self.speed
             
         self.rect.move_ip(vector)
+    
+    def shoot(self, charge, entities):
+        self.shots.append(Projectile(self.canvas, r'assets\Fire_proj.png', 10, self, x=self.rect.centerx, y=self.rect.centery, img_scale=3))
 
 
 class Enemy(Object):
@@ -130,19 +134,17 @@ class Enemy(Object):
         
     def shoot(self, entities):
         if self.shottimer == 100:
-            print("new volley, straight")
             self.shots.extend([
                 Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=0, x=self.rect.centerx, y=self.rect.bottom, img_scale=3), # bottom
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=90, x=self.rect.right, y=self.rect.centery, img_scale=2), # right
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=180, x=self.rect.centerx, y=self.rect.top, img_scale=2), # top
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=270, x=self.rect.left, y=self.rect.centery, img_scale=2)]) # left
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=90, x=self.rect.right, y=self.rect.centery, img_scale=3), # right
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=180, x=self.rect.centerx, y=self.rect.top, img_scale=3), # top
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=270, x=self.rect.left, y=self.rect.centery, img_scale=3)]) # left
         elif self.shottimer == 200:
-            print("new volley, diagonal")
             self.shots.extend([
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=45, x=self.rect.centerx, y=self.rect.centery, img_scale=2),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=135, x=self.rect.centerx, y=self.rect.centery, img_scale=2),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=225, x=self.rect.centerx, y=self.rect.centery, img_scale=2),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, x=self.rect.centerx, y=self.rect.centery, img_scale=2)])
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=45, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=135, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=225, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=315, x=self.rect.centerx, y=self.rect.centery, img_scale=3)])
             self.shottimer = 0
         else:
             for shot in self.shots:
@@ -160,19 +162,15 @@ class Projectile(Object):
         self.max_dist = max_dist
         if angle == None:
             mx, my = pygame.mouse.get_pos()
-            a = mx-self.parent.rect.centerx
-            weight = (a - mx)/(self.parent.rect.centerx - mx)
-            # a_ = (a - mx) / (self.parent.rect.centerx - mx)
-            print(weight)
-            # self.angle = degrees(asin(a_))
+            angle = atan2(my-self.parent.rect.centery, mx-self.parent.rect.centerx)
+            angle = degrees(angle)
         self.angle = angle
-        self.img = pygame.transform.rotate(self.img, self.angle+90)
+        self.img = pygame.transform.rotate(self.img, angle+90)
         
     def move(self, entities):
         blocked = set(self.collides(entities)[0] + self.in_bounds(self.canvas.get_size()))
         if pythagoras(abs(self.rect.centerx-self.parent.rect.centerx), abs(self.rect.centery-self.parent.rect.centery)) > self.max_dist or \
-           (collision := self.collides(entities)):
+           blocked:
            return self.parent.shots.remove(self)
         
         self.rect.move_ip(self.speed*sin(radians(self.angle)), self.speed*cos(radians(self.angle)))
-        
