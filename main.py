@@ -48,8 +48,8 @@ P2 = Player(
 E1 = Enemy(
     canvas=screen,
     path=os.path.join("assets", "Crystal.png"),
-    x=2000,
-    y=1000,
+    x=100,
+    y=100,
     img_scale=3,
     projectile=os.path.join("assets", "Ice_proj.png")
 )
@@ -64,9 +64,9 @@ pygame.key.set_repeat(5*speed)
 def endgame(won=False):
     screen.fill(black)
     text = None
-    if won == True:
+    if won is True:
         text = font.render("You won!", False, flame)
-    elif won == False:
+    elif won is False:
         text = font.render("You died!", False, flame)
     else:
         text = font.render("Game ended!", False, flame)
@@ -101,7 +101,12 @@ while True:
                     P1.rect.x, P1.rect.y = center[0]-32, center[1]
                     P2.rect.x, P2.rect.y = center[0]+32, center[1]
                 case pygame.K_e:
-                    playerflame.value = 1000 #testing
+                    playerflame.value = 1000  # testing
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                P1.shoot(5, (P2, E1))
+            elif event.button == 3:
+                P2.shoot(5, (P1, E1))
         
     if any(pressed := pygame.key.get_pressed()):
         keys = ['']*8
@@ -115,11 +120,13 @@ while True:
     ### DISPLAY UPDATES ###
     P1.render()
     P2.render()
+    for shot in P1.shots:
+        shot.move((P2, E1))
+        shot.render()
     E1.shoot((P1, P2))
     E1.render()
     playerflame.value = round(playerflame - Flame(0.1), 1)
     pygame.draw.rect(screen, flame, (center[0]-playerflame.value/4, height-16, playerflame.value/2, 10), border_radius=5)
-    pygame.draw.rect(screen, black, (*E1.rect.center,1,1))
     box.render()
 
     pygame.display.flip()

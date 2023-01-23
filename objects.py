@@ -1,5 +1,5 @@
 import pygame
-from math import atan2, cos, degrees, radians, pi, sin, sqrt
+from math import atan2, cos, degrees, radians, sin, sqrt
 
 def pythagoras(a, b):
     return sqrt(a*a + b*b)
@@ -121,11 +121,11 @@ class Player(Object):
         self.rect.move_ip(vector)
     
     def shoot(self, charge, entities):
-        self.shots.append(Projectile(self.canvas, r'assets\Fire_proj.png', 10, self, x=self.rect.centerx, y=self.rect.centery, img_scale=3))
+        self.shots.append(Projectile(self.canvas, r'assets\Fire_proj.png', 10, self, x=self.rect.x, y=self.rect.y, img_scale=3))
 
 
 class Enemy(Object):
-    '''Crystal turret class'''
+    '''Crystal turret class.'''
     def __init__(self, canvas:pygame.Surface, path:str, *, x:int=0, y:int=0, img_scale:float=1, projectile:str):
         super().__init__(canvas, path, x, y, img_scale)
         self.projectile = projectile
@@ -160,10 +160,10 @@ class Projectile(Object):
         self.speed = speed
         self.parent = parent
         self.max_dist = max_dist
-        if angle == None:
+        if angle is None:
             mx, my = pygame.mouse.get_pos()
             angle = atan2(my-self.parent.rect.centery, mx-self.parent.rect.centerx)
-            angle = degrees(angle)
+            angle = -degrees(angle) + 90
         self.angle = angle
         self.img = pygame.transform.rotate(self.img, angle+90)
         
