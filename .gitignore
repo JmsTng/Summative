@@ -8,3 +8,6 @@ replit.nix
 .upm
 poetry.lock
 pyproject.toml
+
+# Program Files
+*.html
