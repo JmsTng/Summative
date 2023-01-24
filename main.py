@@ -26,7 +26,20 @@ center = (width//2, height//2)
 scale = speed = width//1000
 
 # OBJECTS
-
+Pl1 = Platform(
+    canvas=screen,
+    path=os.path.join("assets", "Platform.png"),
+    x=center[0]+16*scale,
+    y=0,
+    img_scale=scale
+)
+Pl2 = Platform(
+    canvas=screen,
+    path=os.path.join("assets", "Platform.png"),
+    x=center[0]+16*scale,
+    y=height-32*scale,
+    img_scale=scale
+)
 playerflame = Flame()
 P1 = Player(
     canvas=screen,
@@ -51,13 +64,21 @@ P2 = Player(
 E1 = Enemy(
     canvas=screen,
     path=os.path.join("assets", "Crystal.png"),
-    x=2000,
-    y=1000,
+    x=center[0]-16*scale,
+    y=16+16*scale,
+    img_scale=3,
+    projectile=os.path.join("assets", "Ice_proj.png")
+)
+E2 = Enemy(
+    canvas=screen,
+    path=os.path.join("assets", "Crystal.png"),
+    x=center[0]-16*scale,
+    y=height-(32*scale),
     img_scale=3,
     projectile=os.path.join("assets", "Ice_proj.png")
 )
 
-box = Object(canvas=screen, path=os.path.join("assets", "Stone1.png"), x=400, y=123, img_scale=10)
+# box = Object(canvas=screen, path=os.path.join("assets", "Stone1.png"), x=400, y=123, img_scale=10)
 
 # INTERACTION
 pygame.key.set_repeat(5*speed)
@@ -102,7 +123,6 @@ while True:
         pickups.append(Pickup(screen, os.path.join("assets", "Stone1.png"), random.randrange(0, width), random.randrange(0, height), scale))
         fcounter = 0
 
-
     for event in pygame.event.get():
         if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
             endgame('/')
@@ -131,11 +151,13 @@ while True:
         for key in P1.keys+P2.keys:
             if pressed[key]:
                 keys.append(key)
-        P1.move((E1, P2, box), keys)
-        P2.move((E1, P1, box), keys)
+        P1.move((E1, P2), keys)
+        P2.move((E1, P1), keys)
 
 
     ### DISPLAY UPDATES ###
+    Pl1.render()
+    Pl2.render()
     for pickup in pickups:
         pickup.render()
         if pickup.apply([P2]):
@@ -146,9 +168,12 @@ while True:
     P1.render()
     P2.render()
     E1.update((P1, P2, *P1.shots))
+    E2.update((P1, P2, *P1.shots))
     playerflame.value = round(playerflame - Flame(0.1), 1)
     pygame.draw.rect(screen, flame, (center[0]-playerflame.value/4, height-16, playerflame.value/2, 10), border_radius=5)
-    box.render()
+    if all([Pl1.press((P1, P2)), Pl2.press((P1, P2))]):
+        endgame(True)
+        break
 
     pygame.display.flip()
     pygame.time.Clock().tick(165)
