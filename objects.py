@@ -4,23 +4,6 @@ from math import atan2, cos, degrees, radians, sin, sqrt
 def pythagoras(a, b):
     return sqrt(a*a + b*b)
 
-class Effect:
-    def __init__(self, canvas:pygame.Surface, path:str, x:int, y:int, img_scale:float=1, duration:int=1000):
-        self.canvas = canvas
-        img = pygame.image.load(path)
-        w = img.get_width()
-        h = img.get_height()
-        self.img = pygame.transform.scale(img, (w * img_scale, h * img_scale))
-        self.rect = pygame.Rect(x, y, w * img_scale, h * img_scale)
-        self.duration = duration
-        self.start = pygame.time.get_ticks()
-
-    def render(self):
-        pygame.draw.rect(self.canvas, self.color, self.rect)
-
-    def update(self):
-        if pygame.time.get_ticks() - self.start >= self.duration:
-            del self
 
 class Object:
     """Base class for all entities."""
@@ -31,18 +14,18 @@ class Object:
         self.img = pygame.transform.scale(img, (w*img_scale, h*img_scale))
         self.canvas = canvas
         self.rect = pygame.Rect(x, y, w*img_scale, h*img_scale)
-        
+
     def near(self, entities):
         entities = list(entities)
-        
+
         for e in entities:
             if not (e.rect.centerx-128 <= self.rect.centerx <= e.rect.centerx+128) or \
                not (e.rect.centery-128 <= self.rect.centery <= e.rect.centery+128):
                 entities.remove(e)
                 continue
-            
+
         return entities
-    
+
     def collides(self, entities):
         entities = self.near(entities)
         res = ([], set())
@@ -62,7 +45,7 @@ class Object:
                 res[1].add(e)
 
         return res
-        
+
     def in_bounds(self, size):
         res = []
         if self.rect.y <= 0:
@@ -73,9 +56,9 @@ class Object:
             res.append('d')
         if self.rect.x+self.rect.w >= size[0]:
             res.append('r')
-        
+
         return res
-    
+
     def render(self, canvas=None, color=None, solid=False):
         canvas = self.canvas if not canvas else canvas
         if solid:
@@ -84,11 +67,30 @@ class Object:
             canvas.blit(self.img, self.rect)
 
 
+class Effect:
+    def __init__(self, canvas:pygame.Surface, path:str, x:int, y:int, img_scale:float=1, duration:int=1000):
+        self.canvas = canvas
+        img = pygame.image.load(path)
+        w = img.get_width()
+        h = img.get_height()
+        self.img = pygame.transform.scale(img, (w * img_scale, h * img_scale))
+        self.rect = pygame.Rect(x, y, w * img_scale, h * img_scale)
+        self.duration = duration
+        self.start = pygame.time.get_ticks()
+
+    def render(self):
+        pygame.draw.rect(self.canvas, self.color, self.rect)
+
+    def update(self):
+        if pygame.time.get_ticks() - self.start >= self.duration:
+            del self
+
+
 class Pickup(Object):
     """Class for objects that can be picked up."""
     def __init__(self, canvas:pygame.Surface, path:str, x:int=0, y:int=0, img_scale:float=1):
         super().__init__(canvas=canvas, path=path, x=x, y=y, img_scale=img_scale)
-    
+
     def apply(self, player):
         collide = self.collides(player)
         if collide[1]:
@@ -97,9 +99,14 @@ class Pickup(Object):
         return False
 
 
-# class Portal(Object):
-#     """For end puzzle/objective."""
-#     def __init__(self):
+class Platform(Object):
+    """For end puzzle/objective."""
+    def __init__(self, canvas:pygame.Surface, path:str, x:int=0, y:int=0, img_scale:float=1):
+        super().__init__(canvas=canvas, path=path, x=x, y=y, img_scale=img_scale)
+
+    def press(self, player):
+        collide = self.collides(player)
+        return True if collide[1] else False
 
 
 class Flame:
@@ -155,24 +162,32 @@ class Enemy(Object):
         self.shottimer = 0
         self.shots = []
         self.health = health
-        
+
+    def update(self, entities):
+        self.shoot(entities)
+        if self.health > 0:
+            self.shottimer += 1
+            self.render()
+            # self.render_health()
+        else:
+            self.rect.x = -100
+
     def shoot(self, entities):
         if self.shottimer == 100:
             self.shots.extend([
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=0, x=self.rect.centerx, y=self.rect.bottom, img_scale=3), # bottom
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=90, x=self.rect.right, y=self.rect.centery, img_scale=3), # right
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=180, x=self.rect.centerx, y=self.rect.top, img_scale=3), # top
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=270, x=self.rect.left, y=self.rect.centery, img_scale=3), # left
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=0, x=self.rect.centerx, y=self.rect.bottom, img_scale=3),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=90, x=self.rect.right, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=180, x=self.rect.centerx, y=self.rect.top, img_scale=3),
+                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=270, x=self.rect.left, y=self.rect.centery, img_scale=3),
                 Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=45, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
                 Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=135, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
                 Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=225, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
                 Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=315, x=self.rect.centerx, y=self.rect.centery, img_scale=3)])
-            self.shottimer = -1
+            self.shottimer = 0
         else:
             for shot in self.shots:
                 shot.move(entities)
                 shot.render()
-        self.shottimer += 1
 
 
 class Projectile(Object):
@@ -192,7 +207,8 @@ class Projectile(Object):
     def move(self, entities):
         collides = self.collides(entities)
         blocked = set(collides[0] + self.in_bounds(self.canvas.get_size()))
-        if pythagoras(abs(self.rect.centerx-self.parent.rect.centerx), abs(self.rect.centery-self.parent.rect.centery)) > self.max_dist or blocked:
+        dist = pythagoras(abs(self.rect.centerx-self.parent.rect.centerx), abs(self.rect.centery-self.parent.rect.centery))
+        if dist > self.max_dist or blocked:
             self.parent.shots.remove(self)
             del self
             if collides[1]:
@@ -200,9 +216,7 @@ class Projectile(Object):
                     if type(entity) == Player:
                         entity.flame.value -= 100
                     if type(entity) == Enemy:
-                        print('hit')
-                        entity.health -= 10
-                        print(entity.health)
+                        entity.health -= 25
             return
         
         self.rect.move_ip(self.speed*sin(radians(self.angle)), self.speed*cos(radians(self.angle)))

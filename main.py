@@ -5,7 +5,7 @@ import sys
 import time
 
 import pygame
-from objects import Enemy, Flame, Pickup, Player, Object
+from objects import Enemy, Flame, Pickup, Platform, Player, Object
 
 
 ### CONSTANTS ###
@@ -26,6 +26,7 @@ center = (width//2, height//2)
 scale = speed = width//1000
 
 # OBJECTS
+
 playerflame = Flame()
 P1 = Player(
     canvas=screen,
@@ -130,8 +131,8 @@ while True:
         for key in P1.keys+P2.keys:
             if pressed[key]:
                 keys.append(key)
-        P1.move((P2, box), keys)
-        P2.move((P1, box), keys)
+        P1.move((E1, P2, box), keys)
+        P2.move((E1, P1, box), keys)
 
 
     ### DISPLAY UPDATES ###
@@ -144,8 +145,7 @@ while True:
         shot.move((E1, *E1.shots))
     P1.render()
     P2.render()
-    E1.shoot((P1, P2, *P1.shots))
-    E1.render()
+    E1.update((P1, P2, *P1.shots))
     playerflame.value = round(playerflame - Flame(0.1), 1)
     pygame.draw.rect(screen, flame, (center[0]-playerflame.value/4, height-16, playerflame.value/2, 10), border_radius=5)
     box.render()
