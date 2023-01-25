@@ -13,7 +13,8 @@ class Object:
         h = img.get_height()
         self.img = pygame.transform.scale(img, (w*img_scale, h*img_scale))
         self.canvas = canvas
-        self.rect = pygame.Rect(x, y, w*img_scale, h*img_scale)
+        self.rect = pygame.Rect(0, 0, w*img_scale, h*img_scale)
+        self.rect.center = (x, y)
 
     def near(self, entities):
         entities = list(entities)
@@ -92,9 +93,9 @@ class Pickup(Object):
         super().__init__(canvas=canvas, path=path, x=x, y=y, img_scale=img_scale)
 
     def apply(self, player):
-        collide = self.collides(player)
+        collide = self.collides((player,))
         if collide[1]:
-            player[0].flame.value += 100
+            player.flame.value += min(100, 1000 - player.flame.value)
             return True
         return False
 
@@ -151,7 +152,7 @@ class Player(Object):
         self.rect.move_ip(vector)
     
     def shoot(self, charge):
-        self.shots.append(Projectile(self.canvas, r'assets\Fire_proj.png', 10, self, x=self.rect.x, y=self.rect.y, img_scale=3, max_dist=charge))
+        self.shots.append(Projectile(self.canvas, r'assets\img\Fire_proj.png', 10, self, x=self.rect.centerx, y=self.rect.centery, img_scale=3, max_dist=charge))
 
 
 class Enemy(Object):
@@ -175,14 +176,14 @@ class Enemy(Object):
     def shoot(self, entities):
         if self.shottimer == 100:
             self.shots.extend([
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=0, x=self.rect.centerx, y=self.rect.bottom, img_scale=3),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=90, x=self.rect.right, y=self.rect.centery, img_scale=3),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=180, x=self.rect.centerx, y=self.rect.top, img_scale=3),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=270, x=self.rect.left, y=self.rect.centery, img_scale=3),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=45, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=135, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=225, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
-                Projectile(self.canvas, r'assets\Ice_proj.png', 5, self, angle=315, x=self.rect.centerx, y=self.rect.centery, img_scale=3)])
+                Projectile(self.canvas, r'assets\img\Ice_proj.png', 5, self, angle=0, x=self.rect.centerx, y=self.rect.bottom, img_scale=3),
+                Projectile(self.canvas, r'assets\img\Ice_proj.png', 5, self, angle=90, x=self.rect.right, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\img\Ice_proj.png', 5, self, angle=180, x=self.rect.centerx, y=self.rect.top, img_scale=3),
+                Projectile(self.canvas, r'assets\img\Ice_proj.png', 5, self, angle=270, x=self.rect.left, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\img\Ice_proj.png', 5, self, angle=45, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\img\Ice_proj.png', 5, self, angle=135, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\img\Ice_proj.png', 5, self, angle=225, x=self.rect.centerx, y=self.rect.centery, img_scale=3),
+                Projectile(self.canvas, r'assets\img\Ice_proj.png', 5, self, angle=315, x=self.rect.centerx, y=self.rect.centery, img_scale=3)])
             self.shottimer = 0
         else:
             for shot in self.shots:

@@ -5,7 +5,8 @@ import sys
 import time
 
 import pygame
-from objects import Enemy, Flame, Pickup, Platform, Player, Object
+from objects import Enemy, Flame, Pickup, Platform, Player
+from scenes import start#, intro, end
 
 
 ### CONSTANTS ###
@@ -20,65 +21,26 @@ white = (255, 255, 255)
 
 # DISPLAY
 screen = pygame.display.set_mode()
+pygame.display.set_caption("FROSTTHAW")
 size = width, height = screen.get_size()
-font = pygame.font.Font(r'assets\Grand9K Pixel.ttf', min(size)//16)
+title_font = pygame.font.Font(os.path.join("assets", "font", "Grand9k Pixel.ttf"), min(size) // 16)
+header_font = pygame.font.Font(os.path.join("assets", "font", "Grand9k Pixel.ttf"), min(size) // 24)
+body_font = pygame.font.Font(os.path.join("assets", "font", "Grand9k Pixel.ttf"), min(size) // 32)
 center = (width//2, height//2)
 scale = speed = width//1000
 
 # OBJECTS
-Pl1 = Platform(
-    canvas=screen,
-    path=os.path.join("assets", "Platform.png"),
-    x=center[0]+16*scale,
-    y=0,
-    img_scale=scale
-)
-Pl2 = Platform(
-    canvas=screen,
-    path=os.path.join("assets", "Platform.png"),
-    x=center[0]+16*scale,
-    y=height-32*scale,
-    img_scale=scale
-)
 playerflame = Flame()
-P1 = Player(
-    canvas=screen,
-    path=os.path.join("assets", "Character1.png"),
-    keys=(pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d),
-    speed=speed,
-    x=center[0]-32,
-    y=center[1],
-    img_scale=scale,
-    flame=playerflame
-)
-P2 = Player(
-    canvas=screen,
-    path=os.path.join("assets", "Character2.png"),
-    keys=(pygame.K_UP, pygame.K_LEFT, pygame.K_DOWN, pygame.K_RIGHT),
-    speed=speed,
-    x=center[0]+32,
-    y=center[1],
-    img_scale=scale,
-    flame=playerflame
-)
-E1 = Enemy(
-    canvas=screen,
-    path=os.path.join("assets", "Crystal.png"),
-    x=center[0]-16*scale,
-    y=16+16*scale,
-    img_scale=3,
-    projectile=os.path.join("assets", "Ice_proj.png")
-)
-E2 = Enemy(
-    canvas=screen,
-    path=os.path.join("assets", "Crystal.png"),
-    x=center[0]-16*scale,
-    y=height-(32*scale),
-    img_scale=3,
-    projectile=os.path.join("assets", "Ice_proj.png")
-)
+Pl1 = Platform(canvas=screen, path=os.path.join("assets", "img", "Platform.png"), x=center[0], y=32*scale/2+16, img_scale=scale)
+Pl2 = Platform(canvas=screen, path=os.path.join("assets", "img", "Platform.png"), x=center[0], y=height-32*scale/2-16, img_scale=scale)
+P1 = Player(canvas=screen, path=os.path.join("assets", "img", "Character1.png"), keys=(pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d), speed=speed, x=center[0]-32*scale, y=center[1], img_scale=scale, flame=playerflame)
+P2 = Player(canvas=screen, path=os.path.join("assets", "img", "Character2.png"), keys=(pygame.K_UP, pygame.K_LEFT, pygame.K_DOWN, pygame.K_RIGHT), speed=speed, x=center[0]+32*scale, y=center[1], img_scale=scale, flame=playerflame)
+E1 = Enemy(canvas=screen, path=os.path.join("assets", "img", "Crystal.png"), x=center[0], y=32*scale/2+40*scale, img_scale=3, projectile=os.path.join("assets", "img", "Ice_proj.png"))
+E2 = Enemy(canvas=screen, path=os.path.join("assets", "img", "Crystal.png"), x=center[0], y=height-32*scale/2-40*scale, img_scale=3, projectile=os.path.join("assets", "img", "Ice_proj.png"))
 
-# box = Object(canvas=screen, path=os.path.join("assets", "Stone1.png"), x=400, y=123, img_scale=10)
+enemies = [E1, E2]
+
+# box = Object(canvas=screen, path=os.path.join("assets", "img", "Stone1.png"), x=400, y=123, img_scale=10)
 
 # INTERACTION
 pygame.key.set_repeat(5*speed)
@@ -89,15 +51,21 @@ fguaranteed = 60*30
 
 
 ### Menus ###
+pebbles = [
+    (pygame.transform.scale(pygame.image.load(os.path.join("assets", "img", "Stone1.png")), (8, 8)),
+     random.randrange(0, width),
+     random.randrange(0, height)) for _ in range(250)
+]
+
 def endgame(won=False):
     screen.fill(black)
     text = None
     if won == True:
-        text = font.render("You won!", False, flame)
+        text = title_font.render("You won!", False, flame)
     elif won == False:
-        text = font.render("You died!", False, flame)
+        text = title_font.render("You died!", False, flame)
     else:
-        text = font.render("Game ended!", False, flame)
+        text = title_font.render("Game ended!", False, flame)
     textrect = text.get_rect()
     textrect.center = center
     screen.blit(text, textrect)
@@ -112,15 +80,18 @@ def endgame(won=False):
 
 
 ### EVENT LOOP ###
+# start(screen, size, title_font, scale)
 while True:
     if playerflame.value <= 0:
         endgame()
         break
 
     screen.fill(snow)
+    for p in pebbles:
+        screen.blit(p[0], (p[1], p[2]))
     pygame.event.pump()
     if not random.randrange(0, 1000) or fcounter == fguaranteed:
-        pickups.append(Pickup(screen, os.path.join("assets", "Stone1.png"), random.randrange(0, width), random.randrange(0, height), scale))
+        pickups.append(Pickup(screen, os.path.join("assets", "img", "Fire_Pickup.png"), random.randrange(0, width), random.randrange(0, height), scale))
         fcounter = 0
 
     for event in pygame.event.get():
@@ -151,8 +122,8 @@ while True:
         for key in P1.keys+P2.keys:
             if pressed[key]:
                 keys.append(key)
-        P1.move((E1, P2), keys)
-        P2.move((E1, P1), keys)
+        P1.move((*enemies, P2), keys)
+        P2.move((*enemies, P1), keys)
 
 
     ### DISPLAY UPDATES ###
@@ -160,20 +131,17 @@ while True:
     Pl2.render()
     for pickup in pickups:
         pickup.render()
-        if pickup.apply([P2]):
+        if pickup.apply(P2):
             pickups.remove(pickup)
     for shot in P1.shots:
         shot.render()
-        shot.move((E1, *E1.shots))
+        shot.move([e for e in enemies])
     P1.render()
     P2.render()
-    E1.update((P1, P2, *P1.shots))
-    E2.update((P1, P2, *P1.shots))
+    [e.update((P1, P2, *P1.shots)) for e in enemies]
     playerflame.value = round(playerflame - Flame(0.1), 1)
     pygame.draw.rect(screen, flame, (center[0]-playerflame.value/4, height-16, playerflame.value/2, 10), border_radius=5)
-    if all([Pl1.press((P1, P2)), Pl2.press((P1, P2))]):
-        endgame(True)
-        break
+    if all([Pl1.press((P1, P2)), Pl2.press((P1, P2))]): endgame(True)
 
     pygame.display.flip()
     pygame.time.Clock().tick(165)
