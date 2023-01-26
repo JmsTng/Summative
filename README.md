@@ -2,10 +2,10 @@
 A 2-player game I made for my Grade 9 CS summative project.
 
 ## Table of Contents
-+ #### [Game Instructions](https://github.com/JmsTng/Summative/edit/main/README.md#game-instructions)
-+ #### [Running the Game](https://github.com/JmsTng/Summative/edit/main/README.md#running-the-game)
-  + #### [Pre-compiled](https://github.com/JmsTng/Summative/edit/main/README.md#pre-compiled)
-  + #### [Building from Source](https://github.com/JmsTng/Summative/edit/main/README.md#building-from-source)
++ #### [Game Instructions](https://github.com/JmsTng/Summative/main/README.md#game-instructions)
++ #### [Running the Game](https://github.com/JmsTng/Summative/main/README.md#running-the-game)
+  + #### [Pre-compiled](https://github.com/JmsTng/Summative/main/README.md#pre-compiled)
+  + #### [Building from Source](https://github.com/JmsTng/Summative/main/README.md#building-from-source)
 
 ## Game Instructions
 As a pair of intrepid adventures, survive the chilling cold as you venture up the mountain.
