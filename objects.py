@@ -89,14 +89,22 @@ class Effect:
 
 class Pickup(Object):
     """Class for objects that can be picked up."""
-    def __init__(self, canvas:pygame.Surface, path:str, x:int=0, y:int=0, img_scale:float=1):
+    def __init__(self, canvas:pygame.Surface, path:str, x:int=0, y:int=0, img_scale:float=1, timer:int=1000):
         super().__init__(canvas=canvas, path=path, x=x, y=y, img_scale=img_scale)
+        self.timer = timer
 
     def apply(self, player):
         collide = self.collides((player,))
         if collide[1]:
             player.flame.value += min(100, 1000 - player.flame.value)
             return True
+        return False
+
+    def update(self):
+        if self.timer <= 0:
+            return True
+        self.render()
+        self.timer -= 1
         return False
 
 
@@ -114,17 +122,17 @@ class Flame:
     """Class to represent main game resource."""
     def __init__(self, value:float=1000):
         self.value = value
-    
+
     def __add__(self, other):
-        if type(other) == type(Flame):
+        if type(other) == Flame:
             return self.value + other.value
-        elif type(other) == type(int):
+        elif type(other) == int or type(other) == float:
             return self.value + other
     
     def __sub__(self, other):
         if type(other) == Flame:
             return self.value - other.value
-        elif type(other) == int:
+        elif type(other) == int or type(other) == float:
             return self.value - other
 
 

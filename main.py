@@ -103,8 +103,7 @@ while True:
     Pl1.render()
     Pl2.render()
     for pickup in pickups:
-        pickup.render()
-        if pickup.apply(P2):
+        if pickup.update() or pickup.apply(P2):
             pickups.remove(pickup)
     for shot in P1.shots:
         shot.render()
