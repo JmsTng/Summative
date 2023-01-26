@@ -112,7 +112,7 @@ class Platform(Object):
 
 class Flame:
     """Class to represent main game resource."""
-    def __init__(self, value:int=1000):
+    def __init__(self, value:float=1000):
         self.value = value
     
     def __add__(self, other):
@@ -129,7 +129,7 @@ class Flame:
 
 
 class Player(Object):
-    """Class to represent playble characters."""
+    """Class to represent playable characters."""
     def __init__(self, canvas:pygame.Surface, path:str, keys:tuple, *, speed:float, x:int=0, y:int=0, img_scale:float=1, flame:Flame):
         super().__init__(canvas=canvas, path=path, x=x, y=y, img_scale=img_scale)
         self.keys = keys
