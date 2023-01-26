@@ -91,7 +91,7 @@ while True:
             charge += 1
 
     if any(pressed := pygame.key.get_pressed()):
-        keys = ['']*8
+        keys = []
         for key in P1.keys+P2.keys:
             if pressed[key]:
                 keys.append(key)
